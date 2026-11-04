@@ -39,6 +39,7 @@ venv.bak/
 .pytest_cache/
 .coverage
 htmlcov/
+scratch/
 
 # EasyOCR Model Weights (Automatic on-demand download, avoid >50MB repo bloat)
 models/easyocr/*.pth

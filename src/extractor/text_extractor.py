@@ -137,6 +137,18 @@ class TextBasedExtractor:
         # Multi-line row stitching & normalization
         stitched_transactions = RowStitcher.stitch_raw_rows(raw_rows)
 
+        # Enrich metadata from extracted transactions if not present
+        if stitched_transactions:
+            if metadata.get("statement_period") in [None, "Not Specified"]:
+                metadata["statement_period"] = f"{stitched_transactions[0]['date']} to {stitched_transactions[-1]['date']}"
+            if metadata.get("closing_balance") is None:
+                metadata["closing_balance"] = stitched_transactions[-1].get("balance")
+            if metadata.get("opening_balance") is None:
+                first_bal = float(stitched_transactions[0].get("balance", 0.0) or 0.0)
+                first_dr = float(stitched_transactions[0].get("debit", 0.0) or 0.0)
+                first_cr = float(stitched_transactions[0].get("credit", 0.0) or 0.0)
+                metadata["opening_balance"] = round(first_bal + first_dr - first_cr, 2)
+
         return {
             "metadata": metadata,
             "transactions": stitched_transactions,
@@ -152,11 +164,17 @@ class TextBasedExtractor:
     def _extract_by_coordinates(cls, pdf) -> List[Dict[str, Any]]:
         """
         High-precision coordinate-aware extractor for unbordered or partially-bordered
-        bank statements (e.g. HDFC, ICICI, SBI) where pdfplumber extract_tables collapses rows.
+        bank statements (e.g. HDFC, ICICI, SBI, Standard Chartered) where pdfplumber
+        extract_tables collapses rows or table borders are absent.
         """
-        # Step 1: Detect column boundaries from header line across all pages
-        withdrawal_boundary = None
-        deposit_boundary = None
+        MONTHS = r'(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)'
+        date_regex = re.compile(r"^(\d{1,2}[\/\-\.][A-Za-z0-9]{1,3}[\/\-\.]\d{2,4})")
+        amt_regex = re.compile(r"^[0-9,]+\.[0-9]{2}$")
+
+        # Step 1: Detect column boundaries dynamically from header line across pages
+        is_deposit_first = False
+        mid_boundary = None
+        bal_boundary = None
 
         for p in pdf.pages:
             words = p.extract_words()
@@ -169,7 +187,7 @@ class TextBasedExtractor:
 
             for l in lines:
                 l_txt = " ".join(w['text'] for w in l['words']).upper()
-                if ('DATE' in l_txt) and ('NARRATION' in l_txt or 'PARTICULARS' in l_txt):
+                if ('DATE' in l_txt) and any(k in l_txt for k in ['NARRATION', 'PARTICULARS', 'DESCRIPTION', 'REMARKS', 'DETAILS']):
                     with_w = None
                     dep_w = None
                     bal_w = None
@@ -183,18 +201,19 @@ class TextBasedExtractor:
                             bal_w = w
 
                     if with_w and dep_w:
-                        withdrawal_boundary = (with_w['x1'] + dep_w['x0']) / 2.0
-                    if dep_w and bal_w:
-                        deposit_boundary = (dep_w['x1'] + bal_w['x0']) / 2.0
-                    break
+                        is_deposit_first = dep_w['x0'] < with_w['x0']
+                        col1 = dep_w if is_deposit_first else with_w
+                        col2 = with_w if is_deposit_first else dep_w
+                        mid_boundary = col2['x0']
+                        bal_boundary = bal_w['x0'] if bal_w else col2['x1'] + 50.0
+                        break
 
-            if withdrawal_boundary and deposit_boundary:
+            if mid_boundary and bal_boundary:
                 break
 
-        date_regex = re.compile(r"^(\d{1,2}[\/\-\.][A-Za-z0-9]{1,3}[\/\-\.]\d{2,4})")
-        amt_regex = re.compile(r"^[0-9,]+\.[0-9]{2}$")
-
         raw_rows = []
+        current_date = ""
+
         for p in pdf.pages:
             words = p.extract_words()
             lines = []
@@ -207,55 +226,99 @@ class TextBasedExtractor:
             header_top = 0
             for l in lines:
                 l_txt = " ".join(w['text'] for w in l['words']).upper()
-                if ('DATE' in l_txt or 'TXN DATE' in l_txt) and ('NARRATION' in l_txt or 'PARTICULARS' in l_txt or 'DESCRIPTION' in l_txt):
+                if ('DATE' in l_txt or 'TXN DATE' in l_txt) and any(k in l_txt for k in ['NARRATION', 'PARTICULARS', 'DESCRIPTION', 'REMARKS', 'DETAILS']):
                     header_top = l['top']
                     break
 
             table_lines = [l for l in lines if (l['top'] > header_top if header_top else l['top'] > 180) and l['top'] < 790]
 
             for l in table_lines:
-                lw = l['words']
+                lw = sorted(l['words'], key=lambda x: x['x0'])
                 if not lw:
                     continue
-                first_w = lw[0]['text'].strip()
                 full_line = " ".join(w['text'] for w in lw).upper()
-                if "STATEMENT SUMMARY" in full_line or "PAGE NO" in full_line:
+                condensed = full_line.replace(" ", "")
+
+                # End of transaction table markers
+                if any(k in condensed for k in ["STATEMENTSUMMARY", "PAGENO", "REWARDPOINTS", "CLOSINGBALANCEINCLUDES"]):
+                    break
+                if full_line.startswith("TOTAL ") or full_line == "TOTAL":
                     break
 
-                date_match = date_regex.match(first_w)
-                if date_match:
-                    date_val = date_match.group(1)
-                    amt_words = [w for w in lw if amt_regex.match(w['text'].replace('Cr', '').replace('Dr', '').strip())]
+                # Multi-word (3 tokens e.g. '16 Jun 19') vs single-word ('16/06/2019') date detection
+                is_3token = (len(lw) >= 3 and re.match(r'^\d{1,2}$', lw[0]['text']) and 
+                             re.match(rf'^{MONTHS}', lw[1]['text'], re.I) and 
+                             re.match(r'^\d{2,4}$', lw[2]['text']))
+                is_1token = bool(date_regex.match(lw[0]['text']))
 
-                    debit_val = "0.0"
-                    credit_val = "0.0"
-                    bal_val = "0.0"
+                date_val = ""
+                content_start_idx = 0
 
-                    if withdrawal_boundary and deposit_boundary:
-                        for w in amt_words:
-                            val_str = w['text'].replace(',', '')
-                            if w['x1'] <= withdrawal_boundary:
-                                debit_val = val_str
-                            elif w['x1'] <= deposit_boundary:
+                if is_3token:
+                    date_val = f"{lw[0]['text']} {lw[1]['text']} {lw[2]['text']}"
+                    current_date = date_val
+                    content_start_idx = 3
+                    # Check if next 3 words are value date
+                    if len(lw) >= 6 and re.match(r'^\d{1,2}$', lw[3]['text']) and re.match(rf'^{MONTHS}', lw[4]['text'], re.I) and re.match(r'^\d{2,4}$', lw[5]['text']):
+                        content_start_idx = 6
+                elif is_1token:
+                    date_val = date_regex.match(lw[0]['text']).group(1)
+                    current_date = date_val
+                    content_start_idx = 1
+                    # Check if next word is value date
+                    if len(lw) >= 2 and date_regex.match(lw[1]['text']):
+                        content_start_idx = 2
+
+                # Find decimal amount words
+                amt_words = [w for w in lw if amt_regex.match(w['text'].replace('Cr', '').replace('Dr', '').strip())]
+
+                debit_val = "0.0"
+                credit_val = "0.0"
+                bal_val = "0.0"
+
+                if mid_boundary and bal_boundary:
+                    for w in amt_words:
+                        val_str = w['text'].replace(',', '')
+                        if w['x1'] <= mid_boundary:
+                            if is_deposit_first:
                                 credit_val = val_str
                             else:
-                                bal_val = val_str
-                    else:
-                        if len(amt_words) == 2:
-                            bal_val = amt_words[1]['text'].replace(',', '')
-                            if any(k in full_line for k in ['CR', 'CREDIT', 'DEP', 'SALARY', 'REFUND']):
-                                credit_val = amt_words[0]['text'].replace(',', '')
+                                debit_val = val_str
+                        elif w['x1'] <= bal_boundary:
+                            if is_deposit_first:
+                                debit_val = val_str
                             else:
-                                debit_val = amt_words[0]['text'].replace(',', '')
-                        elif len(amt_words) >= 3:
+                                credit_val = val_str
+                        else:
+                            bal_val = val_str
+                else:
+                    if len(amt_words) == 2:
+                        bal_val = amt_words[1]['text'].replace(',', '')
+                        if any(k in full_line for k in ['CR', 'CREDIT', 'DEP', 'SALARY', 'REFUND']):
+                            credit_val = amt_words[0]['text'].replace(',', '')
+                        else:
                             debit_val = amt_words[0]['text'].replace(',', '')
-                            credit_val = amt_words[1]['text'].replace(',', '')
-                            bal_val = amt_words[2]['text'].replace(',', '')
+                    elif len(amt_words) >= 3:
+                        debit_val = amt_words[0]['text'].replace(',', '')
+                        credit_val = amt_words[1]['text'].replace(',', '')
+                        bal_val = amt_words[2]['text'].replace(',', '')
 
-                    n_words = [w['text'] for w in lw[1:] if w not in amt_words and not date_regex.match(w['text']) and not re.match(r"^\d{14,20}$", w['text'])]
+                # Determine if this row represents a new transaction or a continuation
+                has_balance = float(bal_val.replace(',', '')) > 0
+                has_amt = float(debit_val.replace(',', '')) > 0 or float(credit_val.replace(',', '')) > 0
+
+                desc_words = [w['text'] for w in lw[content_start_idx:] if w not in amt_words and not date_regex.match(w['text']) and not re.match(r"^\d{14,20}$", w['text'])]
+                desc_text = " ".join(desc_words)
+
+                # Skip opening balance / balance forward rows from being counted as transactions
+                if "BALANCE FORWARD" in desc_text.upper() or "BROUGHT FORWARD" in desc_text.upper():
+                    continue
+
+                if date_val or (has_amt and has_balance and current_date):
+                    txn_date = date_val if date_val else current_date
                     raw_rows.append({
-                        'date': date_val,
-                        'description': " ".join(n_words),
+                        'date': txn_date,
+                        'description': desc_text,
                         'debit': debit_val,
                         'credit': credit_val,
                         'balance': bal_val
@@ -263,7 +326,7 @@ class TextBasedExtractor:
                 else:
                     raw_rows.append({
                         'date': '',
-                        'description': " ".join(w['text'] for w in lw),
+                        'description': desc_text if desc_text else " ".join(w['text'] for w in lw),
                         'debit': '0.0',
                         'credit': '0.0',
                         'balance': '0.0'

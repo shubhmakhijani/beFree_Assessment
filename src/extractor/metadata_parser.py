@@ -39,23 +39,56 @@ class MetadataParser:
     def _detect_bank(cls, text: str) -> str:
         text_upper = text.upper()
         
-        # Check IFSC code prefix first (most definitive bank identifier)
+        ifsc_map = {
+            "HDFC": "HDFC BANK",
+            "SBIN": "STATE BANK OF INDIA",
+            "ICIC": "ICICI BANK",
+            "UTIB": "AXIS BANK",
+            "KKBK": "KOTAK MAHINDRA BANK",
+            "BARB": "BANK OF BARODA",
+            "PUNB": "PUNJAB NATIONAL BANK",
+            "CNRB": "CANARA BANK",
+            "INDB": "INDUSIND BANK",
+            "UBIN": "UNION BANK OF INDIA",
+            "YESB": "YES BANK",
+            "SCBL": "STANDARD CHARTERED BANK",
+            "CITI": "CITIBANK",
+            "HSBC": "HSBC BANK",
+            "IDFB": "IDFC FIRST BANK",
+            "FDRL": "FEDERAL BANK"
+        }
+
+        # Priority 1: Check IFSC explicitly linked to IFSC label in header lines
+        ifsc_label_match = re.search(r"IFSC\s*[:\-]?\s*([A-Z]{4}0[A-Z0-9]{6})\b", text_upper)
+        if ifsc_label_match:
+            prefix = ifsc_label_match.group(1)[:4]
+            if prefix in ifsc_map:
+                return ifsc_map[prefix]
+
+        # Priority 2: Header IFSC search (top 30 lines) to avoid transaction narration remarks
+        header_lines = text_upper.split("\n")[:30]
+        header_txt = "\n".join(header_lines)
+        header_ifsc = re.search(r"\b([A-Z]{4})0[A-Z0-9]{6}\b", header_txt)
+        if header_ifsc:
+            prefix = header_ifsc.group(1)
+            if prefix in ifsc_map:
+                return ifsc_map[prefix]
+
+        # Priority 3: Check known banks in document header (first 30 lines)
+        for bank in cls.KNOWN_BANKS:
+            if re.search(r"\b" + re.escape(bank) + r"\b", header_txt) or bank.replace(" ", "") in header_txt:
+                if bank in ["SBI", "SBIN"]:
+                    return "STATE BANK OF INDIA"
+                if bank in ["PNB", "PUNB"]:
+                    return "PUNJAB NATIONAL BANK"
+                if bank in ["STANDARD CHARTERED", "SCB"]:
+                    return "STANDARD CHARTERED BANK"
+                return bank
+
+        # Priority 4: Full document IFSC code prefix (fallback)
         ifsc_match = re.search(r"\b([A-Z]{4})0[A-Z0-9]{6}\b", text_upper)
         if ifsc_match:
             prefix = ifsc_match.group(1)
-            ifsc_map = {
-                "HDFC": "HDFC BANK",
-                "SBIN": "STATE BANK OF INDIA",
-                "ICIC": "ICICI BANK",
-                "UTIB": "AXIS BANK",
-                "KKBK": "KOTAK MAHINDRA BANK",
-                "BARB": "BANK OF BARODA",
-                "PUNB": "PUNJAB NATIONAL BANK",
-                "CNRB": "CANARA BANK",
-                "INDB": "INDUSIND BANK",
-                "UBIN": "UNION BANK OF INDIA",
-                "YESB": "YES BANK"
-            }
             if prefix in ifsc_map:
                 return ifsc_map[prefix]
 
@@ -65,6 +98,8 @@ class MetadataParser:
                     return "STATE BANK OF INDIA"
                 if bank in ["PNB", "PUNB"]:
                     return "PUNJAB NATIONAL BANK"
+                if bank in ["STANDARD CHARTERED", "SCB"]:
+                    return "STANDARD CHARTERED BANK"
                 return bank
 
         # Generic heuristic if known bank not explicitly found (exclude NETBANK, etc.)
@@ -82,7 +117,6 @@ class MetadataParser:
         
         # Helper to clean extraneous labels appearing on same line
         def clean_name(raw_name: str) -> str:
-            # Cut off if other labels appear on same horizontal line
             cutoff_match = re.split(r"\b(?:IFSC|ACCOUNT|A/C|BRANCH|DATE|PERIOD|CIF|STATEMENT|PHONE|MOBILE)\b", raw_name, flags=re.IGNORECASE)
             cleaned = cutoff_match[0].strip(" :-")
             cleaned = re.sub(r"\s{2,}", " ", cleaned)
@@ -100,12 +134,12 @@ class MetadataParser:
                 if 3 <= len(candidate) <= 45 and not any(kw in candidate.upper() for kw in ["STATEMENT", "BANK", "DATE", "NUMBER"]):
                     return candidate
 
-        # Pattern 2: Honorific prefix search in top header lines
+        # Pattern 2: Honorific prefix search in top header lines (e.g. MR. ANUP DUBEY, MR SEENIVASAN)
         for line in lines[:30]:
-            match = re.search(r"\b(MR\.|MRS\.|MS\.|DR\.|M/S\.?)\s+([A-Z\s\.]+)", line, re.IGNORECASE)
+            match = re.search(r"\b(MR|MRS|MS|DR|M/S)\.?\s+([A-Za-z\s\.]+)", line, re.IGNORECASE)
             if match:
-                candidate = clean_name(match.group(1) + " " + match.group(2))
-                if 3 <= len(candidate) <= 45:
+                candidate = clean_name(match.group(1).upper() + " " + match.group(2).strip())
+                if 3 <= len(candidate) <= 45 and not any(kw in candidate.upper() for kw in ["STATEMENT", "BANK", "DATE", "NUMBER", "ACCOUNT", "SAVINGS", "BRANCH"]):
                     return candidate
 
         # Pattern 3: Address block heuristic
@@ -115,7 +149,7 @@ class MetadataParser:
                     idx = i + offset
                     if 0 <= idx < len(lines):
                         cand = clean_name(lines[idx])
-                        if re.match(r"^[A-Z][a-zA-Z\s\.]{3,35}$", cand) and not any(x in cand.upper() for x in ["PAGE", "STATEMENT", "BRANCH", "BANK", "IFSC", "DATE"]):
+                        if re.match(r"^[A-Z][a-zA-Z\s\.]{3,35}$", cand) and not any(x in cand.upper() for x in ["PAGE", "STATEMENT", "BRANCH", "BANK", "IFSC", "DATE", "COLONY", "APARTMENTS", "ROAD", "STREET", "NAGAR"]):
                             return cand
 
         return "Not Specified"
@@ -139,6 +173,16 @@ class MetadataParser:
     @classmethod
     def _extract_ifsc(cls, text: str) -> str:
         # Standard Indian IFSC Code: 4 uppercase letters, '0', 6 alphanumeric
+        label_match = re.search(r"IFSC\s*[:\-]?\s*([A-Z]{4}0[A-Z0-9]{6})\b", text, re.IGNORECASE)
+        if label_match:
+            return label_match.group(1).upper()
+
+        header_lines = text.split("\n")[:30]
+        header_txt = "\n".join(header_lines)
+        match_hdr = re.search(r"\b([A-Z]{4}0[A-Z0-9]{6})\b", header_txt)
+        if match_hdr:
+            return match_hdr.group(1).upper()
+
         match = re.search(r"\b([A-Z]{4}0[A-Z0-9]{6})\b", text)
         if match:
             return match.group(1).upper()
