@@ -1,0 +1,57 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 1486 >>
+stream
+BT
+/F1 9.5 Tf
+45 745 Td
+14.5 TL
+(KOTAK MAHINDRA BANK) ' 
+(Branch: Connaught Place, New Delhi - 110001) ' 
+(Account Holder Name: MRS. ANANYA SEN) ' 
+(Account Number: 4810294819) ' 
+(IFSC Code: KKBK0000182) ' 
+(Statement Period: 01/10/2024 to 26/10/2024) ' 
+(--------------------------------------------------------------------------------) ' 
+(Date        Description                                   Debit       Credit       Balance) ' 
+(--------------------------------------------------------------------------------) ' 
+(01/10/2024  OPENING BALANCE BROUGHT FORWARD                                        75000.00) ' 
+(03/10/2024  MONTHLY SALARY CREDIT GOOGLE INDIA                      125000.00     200000.00) ' 
+(06/10/2024  ZERODHA SECURITIES BROKING TRANSFER        25000.00                   175000.00) ' 
+(09/10/2024  GROWW MUTUAL FUNDS SIP EQUITY              15000.00                   160000.00) ' 
+(13/10/2024  STARBUCKS COFFEE CONNAUGHT PLACE             850.00                   159150.00) ' 
+(17/10/2024  NATURES BASKET ORGANIC GROCERIES            3400.00                   155750.00) ' 
+(20/10/2024  CRED CREDIT CARD BILL PAYMENT              14500.00                   141250.00) ' 
+(23/10/2024  APPLE COM BILL ICLOUD STORAGE                219.00                   141031.00) ' 
+(26/10/2024  INTEREST CREDIT SAVINGS ACCOUNT                           1150.00     142181.00) ' 
+(--------------------------------------------------------------------------------) ' 
+ET
+
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000000 00000 f 
+0000000115 00000 n 
+0000000185 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+1849
+%%EOF

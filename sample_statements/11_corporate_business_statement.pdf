@@ -1,0 +1,57 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 1452 >>
+stream
+BT
+/F1 9.5 Tf
+45 745 Td
+14.5 TL
+(ICICI BANK CURRENT ACCOUNT STATEMENT) ' 
+(Branch: BKC Treasury, Mumbai - 400051) ' 
+(Customer Name: TECHNOVATE SOLUTIONS PRIVATE LIMITED) ' 
+(Account Number: 000405019283) ' 
+(IFSC Code: ICIC0000004) ' 
+(Account Type: Current Account) ' 
+(Statement Period: 01/10/2024 to 30/10/2024) ' 
+(--------------------------------------------------------------------------------) ' 
+(Date        Description                                   Debit       Credit       Balance) ' 
+(--------------------------------------------------------------------------------) ' 
+(01/10/2024  OPENING BALANCE BROUGHT FORWARD                                       450000.00) ' 
+(04/10/2024  CLIENT INVOICE PAYMENT RECEIVED TCS                     380000.00     830000.00) ' 
+(05/10/2024  BULK PAYROLL SALARY DISBURSEMENT          240000.00                   590000.00) ' 
+(10/10/2024  GST TAX PAYMENT GOVERNMENT OF INDIA        45000.00                   545000.00) ' 
+(15/10/2024  OFFICE BROADBAND TATA COMMUNICATIONS        8500.00                   536500.00) ' 
+(20/10/2024  AWS CLOUD SERVICES SERVER HOSTING          32000.00                   504500.00) ' 
+(25/10/2024  OFFICE LEASE RENT PAYMENT DLF              65000.00                   439500.00) ' 
+(30/10/2024  ANNUAL CURRENT ACCOUNT MAINTENANCE          2500.00                   437000.00) ' 
+(--------------------------------------------------------------------------------) ' 
+ET
+
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000000 00000 f 
+0000000115 00000 n 
+0000000185 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+1815
+%%EOF

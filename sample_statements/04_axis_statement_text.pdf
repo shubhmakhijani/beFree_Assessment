@@ -1,0 +1,56 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 1380 >>
+stream
+BT
+/F1 9.5 Tf
+45 745 Td
+14.5 TL
+(AXIS BANK LIMITED) ' 
+(Branch: MG Road, Bengaluru - 560001) ' 
+(Customer Name: MR. VIKRAM ADITYA) ' 
+(Account Number: 914010048291028) ' 
+(IFSC Code: UTIB0000014) ' 
+(Statement Period: 01/10/2024 to 25/10/2024) ' 
+(--------------------------------------------------------------------------------) ' 
+(Date        Particulars                                   Debit       Credit       Balance) ' 
+(--------------------------------------------------------------------------------) ' 
+(01/10/2024  OPENING BALANCE                                                        62000.00) ' 
+(04/10/2024  PAYROLL DIRECT DEP WIPRO LIMITED                         92000.00     154000.00) ' 
+(06/10/2024  SWIGGY FOOD ORDER GURGAON                    520.00                   153480.00) ' 
+(10/10/2024  BESCOM POWER SUPPLY BILL                    3100.00                   150380.00) ' 
+(14/10/2024  BIGBASKET SUPERMARKET ORDER                 2450.00                   147930.00) ' 
+(18/10/2024  OLA CABS AIRPORT RIDE                        680.00                   147250.00) ' 
+(22/10/2024  MYNTRA DESIGNS ONLINE CLOTHING              4200.00                   143050.00) ' 
+(25/10/2024  HDFC HOME LOAN MONTHLY EMI                 18500.00                   124550.00) ' 
+(--------------------------------------------------------------------------------) ' 
+ET
+
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000000 00000 f 
+0000000115 00000 n 
+0000000185 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+1743
+%%EOF

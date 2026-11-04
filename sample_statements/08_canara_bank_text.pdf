@@ -1,0 +1,56 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 1379 >>
+stream
+BT
+/F1 9.5 Tf
+45 745 Td
+14.5 TL
+(CANARA BANK) ' 
+(Branch: Town Hall, Bengaluru - 560002) ' 
+(Account Name : MR. KARTHIK SUBRAMANIAM) ' 
+(Account Number: 102918273645) ' 
+(IFSC Code: CNRB0001029) ' 
+(Statement Period: 01/10/2024 to 27/10/2024) ' 
+(--------------------------------------------------------------------------------) ' 
+(Date        Description                                   Debit       Credit       Balance) ' 
+(--------------------------------------------------------------------------------) ' 
+(01/10/2024  OPENING BALANCE                                                        44000.00) ' 
+(05/10/2024  SALARY NEFT CR INFOTECH LTD                              58000.00     102000.00) ' 
+(08/10/2024  ZOMATO RESTAURANT ORDER                      320.00                   101680.00) ' 
+(12/10/2024  COUNTRY DELIGHT MILK DELIVERY               1450.00                   100230.00) ' 
+(16/10/2024  RAPIDO BIKE TAXI COMMUTE                     110.00                   100120.00) ' 
+(20/10/2024  AMAZON PAY INDIA ONLINE                     1890.00                    98230.00) ' 
+(23/10/2024  ACT FIBERNET MONTHLY BROADBAND              1050.00                    97180.00) ' 
+(27/10/2024  MUTUAL FUND SIP DEBIT CAMSONLINE            4000.00                    93180.00) ' 
+(--------------------------------------------------------------------------------) ' 
+ET
+
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000000 00000 f 
+0000000115 00000 n 
+0000000185 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+1742
+%%EOF

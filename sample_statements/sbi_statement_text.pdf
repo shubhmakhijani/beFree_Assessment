@@ -1,0 +1,58 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 1556 >>
+stream
+BT
+/F1 10 Tf
+50 740 Td
+15 TL
+(STATE BANK OF INDIA) ' 
+(Branch: Nariman Point, Mumbai - 400021) ' 
+(IFS Code: SBIN0000300 | CIF No: 8819203912) ' 
+(TRANSACTION STATEMENT) ' 
+(Account Name : MS. PRIYA PATEL) ' 
+(Account Number: 20491827361) ' 
+(Account Type : Savings Account) ' 
+(Statement Period: 01/10/2024 to 28/10/2024) ' 
+(--------------------------------------------------------------------------------) ' 
+(Txn Date    Description                                   Debit       Credit       Balance) ' 
+(--------------------------------------------------------------------------------) ' 
+(01/10/2024  OPENING BALANCE                                                        35000.00) ' 
+(03/10/2024  SWIGGY BANGALORE UPI 429102                  380.00                    34620.00) ' 
+(06/10/2024  SALARY PAYMENT OCTOBER TCS LTD                           65000.00      99620.00) ' 
+(09/10/2024  RELIANCE FRESH GROCERY STORE                1850.00                    97770.00) ' 
+(14/10/2024  UBER RIDES MUMBAI COMMUTE                    420.00                    97350.00) ' 
+(17/10/2024  JIO RECHARGE PREPAID MOBILE                  749.00                    96601.00) ' 
+(21/10/2024  GROWW MUTUAL FUND SIP OCT                   5000.00                    91601.00) ' 
+(24/10/2024  FLIPKART INTERNET ORDER                     2499.00                    89102.00) ' 
+(28/10/2024  MINIMUM BALANCE CHARGES                      150.00                    88952.00) ' 
+(--------------------------------------------------------------------------------) ' 
+ET
+
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1919
+%%EOF

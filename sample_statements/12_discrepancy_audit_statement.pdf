@@ -1,0 +1,53 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 1119 >>
+stream
+BT
+/F1 9.5 Tf
+45 745 Td
+14.5 TL
+(STATE BANK OF INDIA - AUDIT TEST STATEMENT) ' 
+(Branch: Parliament Street, New Delhi - 110001) ' 
+(Account Name : MR. SURESH MENON) ' 
+(Account Number: 30192837461) ' 
+(IFSC Code: SBIN0000691) ' 
+(Statement Period: 01/10/2024 to 20/10/2024) ' 
+(--------------------------------------------------------------------------------) ' 
+(Date        Description                                   Debit       Credit       Balance) ' 
+(--------------------------------------------------------------------------------) ' 
+(01/10/2024  OPENING BALANCE                                                        50000.00) ' 
+(05/10/2024  SALARY PAYMENT OCTOBER TCS LTD                           60000.00     110000.00) ' 
+(10/10/2024  SWIGGY FOOD ORDER GURGAON                    500.00                   109500.00) ' 
+(15/10/2024  SIMULATED OCR DISCREPANCY AMOUNT            2000.00                    99500.00) ' 
+(18/10/2024  AIRTEL MOBILE POSTPAID RECHARGE              799.00                    98701.00) ' 
+(--------------------------------------------------------------------------------) ' 
+ET
+
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000000 00000 f 
+0000000115 00000 n 
+0000000185 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+1482
+%%EOF

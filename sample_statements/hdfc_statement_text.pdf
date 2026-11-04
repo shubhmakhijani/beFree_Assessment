@@ -1,0 +1,79 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 2762 >>
+stream
+BT
+/F1 10 Tf
+50 740 Td
+15 TL
+(HDFC BANK LIMITED) ' 
+(Branch: Koramangala 4th Block, Bengaluru - 560034) ' 
+(Customer Care: 1800 202 6161 | www.hdfcbank.com) ' 
+(ACCOUNT STATEMENT) ' 
+(Customer Name : MR. RAJESH SHARMA) ' 
+(Account Number: 50100492817291) ' 
+(IFSC Code     : HDFC0001234) ' 
+(Account Type  : Savings Account) ' 
+(Statement Period: 01/10/2024 to 31/10/2024) ' 
+(Currency      : INR \(Indian Rupee\)) ' 
+(--------------------------------------------------------------------------------) ' 
+(Date        Description                                   Debit       Credit       Balance) ' 
+(--------------------------------------------------------------------------------) ' 
+(01/10/2024  OPENING BALANCE BROUGHT FORWARD                                        50000.00) ' 
+(02/10/2024  UPI/428172901/ZOMATO RESTAURANT              450.00                    49550.00) ' 
+(            BANGALORE IN REF 9028120) ' 
+(05/10/2024  SALARY FOR OCT 2024 INFOSYS TECH                         85000.00     134550.00) ' 
+(            ACH CR CORP PAYROLL SERVICES) ' 
+(07/10/2024  BESCOM ELECTRICITY BILL PAYMENT             2340.00                   132210.00) ' 
+(            BBPS BILLPAY ONL 881920) ' 
+(10/10/2024  BLINKIT QUICK GROCERY ESSENTIALS            1120.00                   131090.00) ' 
+(            ORDER 9928172 GURGAON) ' 
+(12/10/2024  HPCL PETROL PUMP FUEL REFILL                2500.00                   128590.00) ' 
+(            POS 402910 KORAMANGALA) ' 
+(15/10/2024  NETFLIX MONTHLY SUBSCRIPTION                 649.00                   127941.00) ' 
+(            MUSIC & STREAMING ENTERTAINMENT) ' 
+(18/10/2024  ZERODHA BROKING LTD FUNDS TRANSFER         15000.00                   112941.00) ' 
+(            UPI 40918293 EQUITY TRADING) ' 
+(20/10/2024  BAJAJ FINANCE LIMITED AUTO EMI              8450.00                   104491.00) ' 
+(            LOAN INSTALMENT ACH DEBIT) ' 
+(22/10/2024  AMAZON INDIA PAYMENTS RETAIL                3499.00                   100992.00) ' 
+(            ORDER 402-9182736-19283) ' 
+(25/10/2024  APOLLO PHARMACY MEDICINES                    880.00                   100112.00) ' 
+(            HEALTHCARE RETAIL STORE) ' 
+(28/10/2024  CONSOLIDATED SMS ALERTS CHARGES               59.00                   100053.00) ' 
+(            QUARTERLY FEE GST) ' 
+(30/10/2024  AIRTEL BROADBAND FIBERNET BILL              1178.00                    98875.00) ' 
+(            TELECOM RECHARGE BBPS) ' 
+(31/10/2024  INTEREST CREDIT SAVINGS ACCOUNT                            625.00      99500.00) ' 
+(            Q2 FY25 INT PAID) ' 
+(--------------------------------------------------------------------------------) ' 
+(* This is a computer-generated bank statement and does not require a physical signature.) ' 
+ET
+
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+3125
+%%EOF
