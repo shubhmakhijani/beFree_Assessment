@@ -74,38 +74,61 @@ class TextBasedExtractor:
         with pdfplumber.open(io.BytesIO(pdf_bytes), password=password) as pdf:
             total_pages = len(pdf.pages)
 
-            for page_idx, page in enumerate(pdf.pages):
-                page_text = page.extract_text() or ""
-                full_doc_text.append(page_text)
+            for page in pdf.pages:
+                full_doc_text.append(page.extract_text() or "")
 
-                # Attempt 1: Explicit bordered tables (gridlines)
-                tables = page.extract_tables({
-                    "vertical_strategy": "lines",
-                    "horizontal_strategy": "lines",
-                    "snap_tolerance": 4,
-                    "join_tolerance": 4,
-                })
+            # Check if any page has a squashed table (multiple newlines in data cells)
+            is_squashed = False
+            for p in pdf.pages:
+                tables = p.extract_tables()
+                for t in tables:
+                    if len(t) < 2:
+                        continue
+                    for r in t[1:]:
+                        for cell in r:
+                            if cell and str(cell).count('\n') >= 2:
+                                is_squashed = True
+                                break
+                        if is_squashed:
+                            break
+                    if is_squashed:
+                        break
+                if is_squashed:
+                    break
 
-                parsed_table_rows = []
-                for table in tables:
-                    parsed = cls._parse_table_data(table)
-                    parsed_table_rows.extend(parsed)
+            if is_squashed:
+                # Use high-precision coordinate layout extractor for unbordered bank PDFs
+                raw_rows = cls._extract_by_coordinates(pdf)
+            else:
+                # Standard bordered table extraction + fallback
+                for page_idx, page in enumerate(pdf.pages):
+                    page_text = full_doc_text[page_idx]
 
-                # Validate whether table extraction yielded genuine transactions
-                has_meaningful_data = any(
-                    r.get("date") and r.get("description") and 
-                    (RowStitcher.clean_amount(r.get("debit")) > 0 or 
-                     RowStitcher.clean_amount(r.get("credit")) > 0 or 
-                     RowStitcher.clean_amount(r.get("balance")) > 0)
-                    for r in parsed_table_rows
-                )
+                    tables = page.extract_tables({
+                        "vertical_strategy": "lines",
+                        "horizontal_strategy": "lines",
+                        "snap_tolerance": 4,
+                        "join_tolerance": 4,
+                    })
 
-                if has_meaningful_data:
-                    raw_rows.extend(parsed_table_rows)
-                else:
-                    # Robust line-by-line parsing based on bank statement patterns
-                    text_rows = cls._parse_text_lines(page_text)
-                    raw_rows.extend(text_rows)
+                    parsed_table_rows = []
+                    for table in tables:
+                        parsed = cls._parse_table_data(table)
+                        parsed_table_rows.extend(parsed)
+
+                    has_meaningful_data = any(
+                        r.get("date") and r.get("description") and 
+                        (RowStitcher.clean_amount(r.get("debit")) > 0 or 
+                         RowStitcher.clean_amount(r.get("credit")) > 0 or 
+                         RowStitcher.clean_amount(r.get("balance")) > 0)
+                        for r in parsed_table_rows
+                    )
+
+                    if has_meaningful_data:
+                        raw_rows.extend(parsed_table_rows)
+                    else:
+                        text_rows = cls._parse_text_lines(page_text)
+                        raw_rows.extend(text_rows)
 
         # Extract metadata from document text
         combined_text = "\n".join(full_doc_text)
@@ -121,9 +144,132 @@ class TextBasedExtractor:
                 "pages_processed": total_pages,
                 "raw_rows_found": len(raw_rows),
                 "stitched_transactions_count": len(stitched_transactions),
-                "extraction_mode": "TEXT_PLUMBER"
+                "extraction_mode": "COORDINATE_LAYOUT" if is_squashed else "TEXT_PLUMBER"
             }
         }
+
+    @classmethod
+    def _extract_by_coordinates(cls, pdf) -> List[Dict[str, Any]]:
+        """
+        High-precision coordinate-aware extractor for unbordered or partially-bordered
+        bank statements (e.g. HDFC, ICICI, SBI) where pdfplumber extract_tables collapses rows.
+        """
+        # Step 1: Detect column boundaries from header line across all pages
+        withdrawal_boundary = None
+        deposit_boundary = None
+
+        for p in pdf.pages:
+            words = p.extract_words()
+            lines = []
+            for w in sorted(words, key=lambda x: (x['top'], x['x0'])):
+                if not lines or abs(w['top'] - lines[-1]['top']) > 3.5:
+                    lines.append({'top': w['top'], 'words': [w]})
+                else:
+                    lines[-1]['words'].append(w)
+
+            for l in lines:
+                l_txt = " ".join(w['text'] for w in l['words']).upper()
+                if ('DATE' in l_txt) and ('NARRATION' in l_txt or 'PARTICULARS' in l_txt):
+                    with_w = None
+                    dep_w = None
+                    bal_w = None
+                    for w in l['words']:
+                        w_clean = re.sub(r'[^a-zA-Z]', '', w['text'].lower())
+                        if 'withdraw' in w_clean or 'debit' in w_clean:
+                            with_w = w
+                        elif 'deposit' in w_clean or 'credit' in w_clean:
+                            dep_w = w
+                        elif 'closing' in w_clean or 'balance' in w_clean or 'bal' in w_clean:
+                            bal_w = w
+
+                    if with_w and dep_w:
+                        withdrawal_boundary = (with_w['x1'] + dep_w['x0']) / 2.0
+                    if dep_w and bal_w:
+                        deposit_boundary = (dep_w['x1'] + bal_w['x0']) / 2.0
+                    break
+
+            if withdrawal_boundary and deposit_boundary:
+                break
+
+        date_regex = re.compile(r"^(\d{1,2}[\/\-\.][A-Za-z0-9]{1,3}[\/\-\.]\d{2,4})")
+        amt_regex = re.compile(r"^[0-9,]+\.[0-9]{2}$")
+
+        raw_rows = []
+        for p in pdf.pages:
+            words = p.extract_words()
+            lines = []
+            for w in sorted(words, key=lambda x: (x['top'], x['x0'])):
+                if not lines or abs(w['top'] - lines[-1]['top']) > 3.5:
+                    lines.append({'top': w['top'], 'words': [w]})
+                else:
+                    lines[-1]['words'].append(w)
+
+            header_top = 0
+            for l in lines:
+                l_txt = " ".join(w['text'] for w in l['words']).upper()
+                if ('DATE' in l_txt or 'TXN DATE' in l_txt) and ('NARRATION' in l_txt or 'PARTICULARS' in l_txt or 'DESCRIPTION' in l_txt):
+                    header_top = l['top']
+                    break
+
+            table_lines = [l for l in lines if (l['top'] > header_top if header_top else l['top'] > 180) and l['top'] < 790]
+
+            for l in table_lines:
+                lw = l['words']
+                if not lw:
+                    continue
+                first_w = lw[0]['text'].strip()
+                full_line = " ".join(w['text'] for w in lw).upper()
+                if "STATEMENT SUMMARY" in full_line or "PAGE NO" in full_line:
+                    break
+
+                date_match = date_regex.match(first_w)
+                if date_match:
+                    date_val = date_match.group(1)
+                    amt_words = [w for w in lw if amt_regex.match(w['text'].replace('Cr', '').replace('Dr', '').strip())]
+
+                    debit_val = "0.0"
+                    credit_val = "0.0"
+                    bal_val = "0.0"
+
+                    if withdrawal_boundary and deposit_boundary:
+                        for w in amt_words:
+                            val_str = w['text'].replace(',', '')
+                            if w['x1'] <= withdrawal_boundary:
+                                debit_val = val_str
+                            elif w['x1'] <= deposit_boundary:
+                                credit_val = val_str
+                            else:
+                                bal_val = val_str
+                    else:
+                        if len(amt_words) == 2:
+                            bal_val = amt_words[1]['text'].replace(',', '')
+                            if any(k in full_line for k in ['CR', 'CREDIT', 'DEP', 'SALARY', 'REFUND']):
+                                credit_val = amt_words[0]['text'].replace(',', '')
+                            else:
+                                debit_val = amt_words[0]['text'].replace(',', '')
+                        elif len(amt_words) >= 3:
+                            debit_val = amt_words[0]['text'].replace(',', '')
+                            credit_val = amt_words[1]['text'].replace(',', '')
+                            bal_val = amt_words[2]['text'].replace(',', '')
+
+                    n_words = [w['text'] for w in lw[1:] if w not in amt_words and not date_regex.match(w['text']) and not re.match(r"^\d{14,20}$", w['text'])]
+                    raw_rows.append({
+                        'date': date_val,
+                        'description': " ".join(n_words),
+                        'debit': debit_val,
+                        'credit': credit_val,
+                        'balance': bal_val
+                    })
+                else:
+                    raw_rows.append({
+                        'date': '',
+                        'description': " ".join(w['text'] for w in lw),
+                        'debit': '0.0',
+                        'credit': '0.0',
+                        'balance': '0.0'
+                    })
+
+        return raw_rows
 
     @classmethod
     def _parse_table_data(cls, table: List[List[Optional[str]]]) -> List[Dict[str, Any]]:

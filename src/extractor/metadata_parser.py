@@ -38,19 +38,42 @@ class MetadataParser:
     @classmethod
     def _detect_bank(cls, text: str) -> str:
         text_upper = text.upper()
+        
+        # Check IFSC code prefix first (most definitive bank identifier)
+        ifsc_match = re.search(r"\b([A-Z]{4})0[A-Z0-9]{6}\b", text_upper)
+        if ifsc_match:
+            prefix = ifsc_match.group(1)
+            ifsc_map = {
+                "HDFC": "HDFC BANK",
+                "SBIN": "STATE BANK OF INDIA",
+                "ICIC": "ICICI BANK",
+                "UTIB": "AXIS BANK",
+                "KKBK": "KOTAK MAHINDRA BANK",
+                "BARB": "BANK OF BARODA",
+                "PUNB": "PUNJAB NATIONAL BANK",
+                "CNRB": "CANARA BANK",
+                "INDB": "INDUSIND BANK",
+                "UBIN": "UNION BANK OF INDIA",
+                "YESB": "YES BANK"
+            }
+            if prefix in ifsc_map:
+                return ifsc_map[prefix]
+
         for bank in cls.KNOWN_BANKS:
-            if re.search(r"\b" + re.escape(bank) + r"\b", text_upper):
-                if bank == "SBI":
+            if re.search(r"\b" + re.escape(bank) + r"\b", text_upper) or bank.replace(" ", "") in text_upper:
+                if bank in ["SBI", "SBIN"]:
                     return "STATE BANK OF INDIA"
-                if bank == "PNB":
+                if bank in ["PNB", "PUNB"]:
                     return "PUNJAB NATIONAL BANK"
                 return bank
-        # Generic heuristic if known bank not explicitly found
+
+        # Generic heuristic if known bank not explicitly found (exclude NETBANK, etc.)
         match = re.search(r"([A-Z\s]+BANK(?:\s+OF\s+[A-Z]+)?)", text_upper)
         if match:
             candidate = match.group(1).strip()
-            if len(candidate) < 35:
+            if candidate not in ["NETBANK", "INTERNET BANK"] and len(candidate) < 35:
                 return candidate
+
         return "Bank Statement (General)"
 
     @classmethod

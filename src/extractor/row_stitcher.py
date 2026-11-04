@@ -51,6 +51,10 @@ class RowStitcher:
         if not val_str or val_str in ["-", "--", "NA", "N/A", "nil", "NIL", "0"]:
             return 0.0
 
+        # Safety guard: Never concatenate multiple lines of amounts into one monster number
+        if "\n" in val_str:
+            val_str = val_str.split("\n")[0].strip()
+
         # Remove currency symbols and formatting characters
         val_str = re.sub(r"[₹\$£€INRRs\.,\s]", lambda m: "." if m.group(0) == "." else "", val_str)
         # Fix multiple dots if commas were cleaned wrong
