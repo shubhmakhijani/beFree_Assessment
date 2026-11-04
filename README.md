@@ -236,7 +236,6 @@ befree-project/
 ├── PRESENTATION_GUIDE.md              # Technical presentation script & slide guide
 ├── evaluation_benchmark_report.md     # 13-Bank statement evaluation report
 ├── evaluate_all.py                    # Automated test runner across all 13 statements
-├── run_app.bat                        # 1-Click launcher script for Windows
 ├── architecture_diagram.svg           # High-resolution Draw.io vector SVG diagram
 ├── architecture_diagram.drawio        # Native editable Draw.io XML source file
 ├── architecture_diagram.html          # Standalone interactive browser diagram
@@ -315,7 +314,6 @@ pip install -r requirements.txt
 ```bash
 python -m streamlit run app.py
 ```
-*Or on Windows: simply double-click `run_app.bat`.*
 
 The interactive web portal will open at `http://localhost:8501`.
 
